@@ -31,14 +31,17 @@ nyt_list = parse_json(list_names)
 
 nyt_list_names = []
 nyt_list_info = {}
+nyt_list_dict = {}
 for item in nyt_list['results']:
-    display_name = item['display_name']
+    list_name = item['list_name']
+    list_name_nyt = item['list_name_encoded']
     last_date = item['newest_published_date']
     last_updated = item['updated']
-    string = f"List Name: {display_name}\nUpdated on: {last_date} Updated {last_updated}"
-    nyt_list_names.append(display_name)
+    string = f"List Name: {list_name}\nUpdated on: {last_date} Updated {last_updated}"
+    nyt_list_names.append(list_name)
+    nyt_list_dict[list_name] = list_name_nyt
     readable_date = read_date(last_date)
-    nyt_list_info[display_name] = f"The best seller list for {display_name} was last updated on {readable_date} and is typically updated {last_updated.lower()}."
+    nyt_list_info[item['list_name']] = f"The best seller list for {list_name} was last updated on {readable_date} and is typically updated {last_updated.lower()}."
 
 
 #Print welcoming message to user with a description of the app
@@ -72,9 +75,10 @@ def list_browse():
             print("We found a matching genre!")
             print(nyt_list_info[genre])
             print("        ")
-            print(f"The New York Times Top 5 Best Selleing {genre} Books: ")
+            print(f"The New York Times Top 5 Best Selling {genre} Books: ")
             print("        ")
-            list_data_url = f"https://api.nytimes.com/svc/books/v3/lists/current/{genre}.json?api-key=za7DPypRNtsNzAW8VGweJEJW6EHJJZSG"
+            url_list = nyt_list_dict[genre]
+            list_data_url = f"https://api.nytimes.com/svc/books/v3/lists/current/{url_list}.json?api-key=za7DPypRNtsNzAW8VGweJEJW6EHJJZSG"
             nyt_list_data = parse_json(list_data_url)
             nyt_list_data_adj = nyt_list_data['results']['books']
             break
@@ -86,19 +90,40 @@ list_browse()
 
 #From NYT API, return a top 5 list of the best selling books within that genre for that timeframe
 
-book_list = []
+book_list = {}
+read_list = {}
+
+def add_books_to_list(author):
+    prompt5 = "Would you like to add a book to your Read List?\nIf no, enter 'no. If yes, enter 'yes'.\nEnter here: "
+    read_book = input(prompt5)
+    if read_book == 'no' or read_book == 'No' or read_book == 'NO':
+        pass
+    elif read_book == 'yes' or read_book == 'Yes' or read_book == 'YES':
+        prompt6 = "Enter in the book title here: "
+        book_add = input(prompt6)
+        read_list[book_add] = author
+        print("     ")
+        print(f"{book_add} has been added!")
+        print("     ")
+
 def book_ranking():
     for book in nyt_list_data_adj:
         global book_list
         if book['rank'] <= 5:
             rank = book['rank']
             book_name = book['title']
-            book_list.append(book_name)
             author = book['author']
+            book_list[book_name] = author
             print(f"{rank}. {book_name}\nWritten by {author} ")
             print("      ")
         else:
             pass
+    while True:
+        add_books_to_list(author)
+        print("     ")
+
+        break
+
 
 book_ranking()
 
@@ -115,16 +140,49 @@ def book_description():
 
 while True:
     global browse_or_read
-    prompt2 = "Enter the book title if want to see the description of a book.\nIf you want to browse other book lists, enter 'browse'!\nEnter here: "
+    print("More Actions Below:")
+    prompt2 = "Would you like to see the description of a book to learn more?\nIf so, enter the title of the book (ex. 'SULLY').\nIf you want to browse other book lists, enter 'browse'!\nEnter here: "
     browse_or_read = input(prompt2)
     if browse_or_read =='browse':
         list_browse()
         book_ranking()
     elif browse_or_read in book_list:
         book_description()
+        break
 
+def search_books():
+    while True:
+        prompt3 = "Would you like to search any book title on Amazon.com?\nIf so, enter 'search'.\nIf you would like to be done enter 'done'.\nIF you would like to continue to browse, enter 'browse'.\nEnter here: "
+        search_book_title = input(prompt3)
+        if search_book_title == 'browse' or search_book_title == 'Browse' or search_book_title == "BROWSE":
+            list_browse()
+            book_ranking()
+            break
+        elif search_book_title == 'done' or search_book_title == 'Done' or search_book_title == 'DONE':
+            print("               ")
+            if read_list:
+                print("Read List:")
+                for read in read_list:
+                    print(f"{read}, written by {read_list[read]}.")
+                print("               ")
+                print("We're done finding books! Keep on reading!")
+                break
+            else:
+                print("               ")
+                print("We're done finding books! Keep on reading!")
+                break
+        else:
+            prompt4 = "Enter the author here"
+            search_book_author = input(prompt4)
+            search_term = f"{search_book_title} {search_book_author}"
+            amazon_url = f"https://api.rainforestapi.com/request?api_key=AB2B43542B3C49B2A94D5D80E0B6096C&type=search&amazon_domain=amazon.com&search_term={search_term}"
+            print(get_products(amazon_url))
+            break
 
-#Ask the user if he/she wants to add a book to a list
+search_books()
+
+#Ask the user if he/she wants to see the book on amazon
+
 
 #Ask the user if he/she wants to see the book on amazon
 
