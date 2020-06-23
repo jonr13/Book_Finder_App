@@ -93,22 +93,24 @@ list_browse()
 book_list = {}
 read_list = {}
 
-def add_books_to_list(author):
-    prompt5 = "Would you like to add a book to your Read List?\nIf no, enter 'no. If yes, enter 'yes'.\nEnter here: "
-    read_book = input(prompt5)
-    if read_book == 'no' or read_book == 'No' or read_book == 'NO':
-        pass
-    elif read_book == 'yes' or read_book == 'Yes' or read_book == 'YES':
+
+def add_books_to_list():
         prompt6 = "Enter in the book title here: "
         book_add = input(prompt6)
-        read_list[book_add] = author
+        prompt7 = "Enter the author here: "
+        author_add = input(prompt7)
+        read_list[book_add] = author_add
         print("     ")
-        print(f"{book_add} has been added!")
+        print(f"{book_add}, written by {author_add} has been added to the Read List!")
         print("     ")
+
+
+
 
 def book_ranking():
     for book in nyt_list_data_adj:
         global book_list
+        global author
         if book['rank'] <= 5:
             rank = book['rank']
             book_name = book['title']
@@ -118,11 +120,7 @@ def book_ranking():
             print("      ")
         else:
             pass
-    while True:
-        add_books_to_list(author)
-        print("     ")
 
-        break
 
 
 book_ranking()
@@ -142,7 +140,7 @@ while True:
     global browse_or_read
     print("More Actions Below:")
     print("       ")
-    prompt2 = "Would you like to see the description of a book to learn more? If so, enter the title of the book (ex. 'SULLY').\nIf you want to browse other book lists, enter 'browse'!\nIf you want to be just continue, type 'pass'.\nEnter here: "
+    prompt2 = "1. Would you like to see the description of a book to learn more? If so, enter the title of the book (ex. 'SULLY').\n2. Do you want to browse other book lists? If so, enter 'browse'.\n3. Do you want to add a book to your read list? If so, enter 'add'.\n \nIf you want to be just continue, type 'pass'.\n \nEnter here: "
     browse_or_read = input(prompt2)
     print("      ")
     if browse_or_read =='browse' or browse_or_read == 'Browse' or browse_or_read == 'BROWSE':
@@ -150,9 +148,11 @@ while True:
         book_ranking()
     elif browse_or_read == 'pass' or browse_or_read == 'pass' or browse_or_read == 'pass':
         break
+    elif browse_or_read == 'add' or browse_or_read == 'Add' or browse_or_read == 'ADD':
+        add_books_to_list()
     elif browse_or_read in book_list:
         book_description()
-        break
+
 
 def print_desc(get):
     amz = get['search_results']
@@ -203,7 +203,7 @@ def print_desc(get):
 
 def search_books():
     while browse_or_read != 'done':
-        prompt3 = "Would you like to search any book title on Amazon.com?\nIf so, enter 'search'.\nIf you would like to be done enter 'done'.\nIF you would like to continue to browse, enter 'browse'.\nEnter here: "
+        prompt3 = "1. Would you like to search any book title on Amazon.com? If so, enter 'search'.\n2. Would you like to finish searching books? If so, enter 'done'.\n3. Would you like to continue to browse? If so, enter 'browse'.\nEnter here: "
         print("       ")
         search_book = input(prompt3)
         print("       ")
@@ -236,6 +236,9 @@ def search_books():
             get= get_products(amazon_url)
             print_desc(get)
             break
+
+print("     ")
+print("Search & Finish Options: ")
 
 search_books()
 
