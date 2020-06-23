@@ -2,9 +2,15 @@ import operator
 import csv
 import requests
 import json
+from dotenv import load_dotenv
+import os
 
-list_names = "https://api.nytimes.com/svc/books/v3/lists/names.json?api-key=za7DPypRNtsNzAW8VGweJEJW6EHJJZSG"
-api_url = "https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=za7DPypRNtsNzAW8VGweJEJW6EHJJZSG"
+load_dotenv()
+nyt_api_key1 = os.getenv("nyt_api_key")
+rainforest_api1 = os.getenv("rainforest_api")
+
+list_names = f"https://api.nytimes.com/svc/books/v3/lists/names.json?api-key={nyt_api_key1}"
+api_url = f"https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key={nyt_api_key1}"
 def get_products(api_url):
     request_url = api_url
     response = requests.get(request_url)
@@ -93,7 +99,6 @@ list_browse()
 book_list = {}
 read_list = {}
 
-
 def add_books_to_list():
         prompt6 = "Enter in the book title here: "
         book_add = input(prompt6)
@@ -103,9 +108,6 @@ def add_books_to_list():
         print("     ")
         print(f"{book_add}, written by {author_add} has been added to the Read List!")
         print("     ")
-
-
-
 
 def book_ranking():
     for book in nyt_list_data_adj:
@@ -121,8 +123,6 @@ def book_ranking():
         else:
             pass
 
-
-
 book_ranking()
 
 #Ask the user if he/she wants to see a book description
@@ -136,23 +136,23 @@ def book_description():
         else:
             pass
 
-while True:
-    global browse_or_read
-    print("More Actions Below:")
-    print("       ")
-    prompt2 = "1. Would you like to see the description of a book to learn more? If so, enter the title of the book (ex. 'SULLY').\n2. Do you want to browse other book lists? If so, enter 'browse'.\n3. Do you want to add a book to your read list? If so, enter 'add'.\n \nIf you want to be just continue, type 'pass'.\n \nEnter here: "
-    browse_or_read = input(prompt2)
-    print("      ")
-    if browse_or_read =='browse' or browse_or_read == 'Browse' or browse_or_read == 'BROWSE':
-        list_browse()
-        book_ranking()
-    elif browse_or_read == 'pass' or browse_or_read == 'pass' or browse_or_read == 'pass':
-        break
-    elif browse_or_read == 'add' or browse_or_read == 'Add' or browse_or_read == 'ADD':
-        add_books_to_list()
-    elif browse_or_read in book_list:
-        book_description()
-
+def more_options():
+    while True:
+        global browse_or_read
+        print("More Actions Below:")
+        print("       ")
+        prompt2 = "1. Would you like to see the description of a book to learn more? If so, enter the title of the book (ex. 'SULLY').\n2. Do you want to browse other book lists? If so, enter 'browse'.\n3. Do you want to add a book to your read list? If so, enter 'add'.\n \nIf you want to continue to Search on Amazon, type 'pass'.\n \nEnter here: "
+        browse_or_read = input(prompt2)
+        print("      ")
+        if browse_or_read =='browse' or browse_or_read == 'Browse' or browse_or_read == 'BROWSE':
+            list_browse()
+            book_ranking()
+        elif browse_or_read == 'pass' or browse_or_read == 'pass' or browse_or_read == 'pass':
+            break
+        elif browse_or_read == 'add' or browse_or_read == 'Add' or browse_or_read == 'ADD':
+            add_books_to_list()
+        elif browse_or_read in book_list:
+            book_description()
 
 def print_desc(get):
     amz = get['search_results']
@@ -203,8 +203,11 @@ def print_desc(get):
 
 def search_books():
     while browse_or_read != 'done':
+        print("   ")
+        print("Search and Finish Options: ")
         prompt3 = "1. Would you like to search any book title on Amazon.com? If so, enter 'search'.\n2. Would you like to finish searching books? If so, enter 'done'.\n3. Would you like to continue to browse? If so, enter 'browse'.\nEnter here: "
         print("       ")
+        global search_book
         search_book = input(prompt3)
         print("       ")
         if search_book == 'browse' or search_book == 'Browse' or search_book == "BROWSE":
@@ -232,35 +235,38 @@ def search_books():
             search_book_title = search_book_title.replace(" ", "+")
             search_book_author = search_book_author.replace(" ", "+")
             search_term = f"{search_book_title}+{search_book_author}"
-            amazon_url = f"https://api.rainforestapi.com/request?api_key=AB2B43542B3C49B2A94D5D80E0B6096C&type=search&amazon_domain=amazon.com&search_term={search_term}"
+            amazon_url = f"https://api.rainforestapi.com/request?api_key={rainforest_api1}&type=search&amazon_domain=amazon.com&search_term={search_term}"
             get= get_products(amazon_url)
             print_desc(get)
             break
 
-print("     ")
-print("Search & Finish Options: ")
-
-search_books()
-
 def final_prompt():
-    print("     ")
-    prompt_final = ("Would you like to search another book?\nIf so type 'yes', if no type 'done.\nEnter here: ")
-    final = input(prompt_final)
-    if final == 'yes' or final == 'Yes' or final == 'YES':
-        search_books()
+    if search_book == 'done' or search_book == 'Done' or search_book == 'DONE':
+        print("     ")
+        print("Thank you for using the book finder app! Have a great day!")
+        pass 
+    elif search_book != 'done' or search_book != 'Done' or search_book != 'DONE':
+        prompt_final = ("Would you like to continue to research books?\nIf so type 'yes', if no type 'done'.\nEnter here: ")
+        final = input(prompt_final)
+        if final == 'yes' or final == 'Yes' or final == 'YES':
+            more_options()
+            search_books()
     else:
         print("      ")
         print("Thank you for using the book finder app! Have a great day!")
 
+#Ask the user if he/she wants to see the book on amazon
+#From Amazon API, pull in price and kindle format data
+#If not on Amazon, print statement saying that not available on Amazon
+#If possible, print the URL for purchase for all items on the list
+while True:
+    more_options()
+    search_books()
+    if search_book == 'done' or search_book == 'Done' or search_book == 'DONE':
+        break
 
 final_prompt()
 
-#Ask the user if he/she wants to see the book on amazon
+#Allow the user to browse books and search again if he/she chooses to
+#End the program by printing the Read List and a thank you message
 
-
-#Ask the user if he/she wants to see the book on amazon
-
-#From Amazon API, pull in price and kindle format data
-#If not on Amazon, print statement saying that not available on Amazon
-
-#If possible, print the URL for purchase for all items on the list
