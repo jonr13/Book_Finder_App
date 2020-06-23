@@ -141,24 +141,77 @@ def book_description():
 while True:
     global browse_or_read
     print("More Actions Below:")
-    prompt2 = "Would you like to see the description of a book to learn more?\nIf so, enter the title of the book (ex. 'SULLY').\nIf you want to browse other book lists, enter 'browse'!\nEnter here: "
+    print("       ")
+    prompt2 = "Would you like to see the description of a book to learn more? If so, enter the title of the book (ex. 'SULLY').\nIf you want to browse other book lists, enter 'browse'!\nIf you want to be just continue, type 'pass'.\nEnter here: "
     browse_or_read = input(prompt2)
-    if browse_or_read =='browse':
+    print("      ")
+    if browse_or_read =='browse' or browse_or_read == 'Browse' or browse_or_read == 'BROWSE':
         list_browse()
         book_ranking()
+    elif browse_or_read == 'pass' or browse_or_read == 'pass' or browse_or_read == 'pass':
+        break
     elif browse_or_read in book_list:
         book_description()
         break
 
+def print_desc(get):
+    amz = get['search_results']
+    for a in amz:
+        try:
+            if a['position'] < 4:
+                title = a['title']
+                print("      ")
+                print(title)
+                link = "       Navigate to Link: "+ a['link']
+                rating = "Average Rating: "+ str(a['rating'])
+                print(rating)
+                kindle = ''
+                kindle_price = ''
+                paperback = ''
+                paperback_price = ''
+                price_name = [price['name'] for price in a['prices']]
+                prices = []
+                for price in a['prices']:
+                    if price['name'] == 'Kindle':
+                        kindle = "    Available for Kindle"
+                        kindle_price = "        Kindle Price: "+ price['raw']
+                        print(kindle)
+                        print(kindle_price)
+                    if price['name'] == 'Paperback':
+                        paperback = "    Available in Paperback"
+                        paperback_price = "       Paperback Price: "+ price['raw']
+                        print(paperback)
+                        print(paperback_price)
+                    if "Kindle" and "Paperback" not in price_name:
+                        prices.append(price)
+                    else:
+                        pass
+                try:
+                    print("    Price: " + prices[0]['raw'])
+                except IndexError:
+                    pass
+                if a['is_prime'] == True:
+                    is_prime = '    Amazon Prime Eligible'
+                    print(is_prime)
+                else:
+                    pass
+                print(link)
+                print("     ")
+        except KeyError:
+            print("    Prices not available.")
+            print(link)
+
 def search_books():
-    while True:
+    while browse_or_read != 'done':
         prompt3 = "Would you like to search any book title on Amazon.com?\nIf so, enter 'search'.\nIf you would like to be done enter 'done'.\nIF you would like to continue to browse, enter 'browse'.\nEnter here: "
-        search_book_title = input(prompt3)
-        if search_book_title == 'browse' or search_book_title == 'Browse' or search_book_title == "BROWSE":
+        print("       ")
+        search_book = input(prompt3)
+        print("       ")
+        if search_book == 'browse' or search_book == 'Browse' or search_book == "BROWSE":
             list_browse()
             book_ranking()
             break
-        elif search_book_title == 'done' or search_book_title == 'Done' or search_book_title == 'DONE':
+        elif search_book == 'done' or search_book == 'Done' or search_book == 'DONE':
             print("               ")
             if read_list:
                 print("Read List:")
@@ -171,15 +224,33 @@ def search_books():
                 print("               ")
                 print("We're done finding books! Keep on reading!")
                 break
-        else:
-            prompt4 = "Enter the author here"
+        elif search_book == 'search' or search_book == 'Search' or search_book == 'SEARCH':
+            prompt5 = "Enter Book Title here: "
+            search_book_title = input(prompt5)
+            prompt4 = "Enter Book Author here: "
             search_book_author = input(prompt4)
-            search_term = f"{search_book_title} {search_book_author}"
+            search_book_title = search_book_title.replace(" ", "+")
+            search_book_author = search_book_author.replace(" ", "+")
+            search_term = f"{search_book_title}+{search_book_author}"
             amazon_url = f"https://api.rainforestapi.com/request?api_key=AB2B43542B3C49B2A94D5D80E0B6096C&type=search&amazon_domain=amazon.com&search_term={search_term}"
-            print(get_products(amazon_url))
+            get= get_products(amazon_url)
+            print_desc(get)
             break
 
 search_books()
+
+def final_prompt():
+    print("     ")
+    prompt_final = ("Would you like to search another book?\nIf so type 'yes', if no type 'done.\nEnter here: ")
+    final = input(prompt_final)
+    if final == 'yes' or final == 'Yes' or final == 'YES':
+        search_books()
+    else:
+        print("      ")
+        print("Thank you for using the book finder app! Have a great day!")
+
+
+final_prompt()
 
 #Ask the user if he/she wants to see the book on amazon
 
