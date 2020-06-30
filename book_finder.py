@@ -1,5 +1,3 @@
-import operator
-import csv
 import requests
 import json
 from dotenv import load_dotenv
@@ -50,7 +48,7 @@ for item in nyt_list['results']:
     nyt_list_info[item['list_name']] = f"The best seller list for {list_name} was last updated on {readable_date} and is typically updated {last_updated.lower()}."
 
 #Print welcoming message to user with a description of the app
-welcome_message = "\nWelcome to the Book Finder!\nIn this app you'll be able to search for a book by genre, browse best seller lists, and book purchasing options.\nAll in one place."
+welcome_message = "\nWelcome to the Best Read Discovery App!\nIn this app you'll be able to search for a book by genre, browse best seller lists, and book purchasing options.\nAll in one place."
 print(welcome_message)
 #For this app you can indicate book genre, and we'll pull best selling from the NYT
 prompt = "\nWhen you're ready to begin press enter.."
@@ -60,6 +58,8 @@ print(welcome_message2)
 #Allow the user to see what genres are available
 #Prompt the user for book genre
 #Print thank you, and print the genre selected
+
+#Key Feature 1: Search New York Times Best Seller List by Genre
 def list_browse():
     global genre
     global nyt_list_data_adj
@@ -73,13 +73,15 @@ def list_browse():
             matching_genre = f"\nWe found a matching genre!\n{nyt_list_info[genre]}\n\nThe New York Times Top 5 Best Selling {genre} Books: \n"
             print(matching_genre)
             url_list = nyt_list_dict[genre]
-            list_data_url = f"https://api.nytimes.com/svc/books/v3/lists/current/{url_list}.json?api-key=za7DPypRNtsNzAW8VGweJEJW6EHJJZSG"
+            list_data_url = f"https://api.nytimes.com/svc/books/v3/lists/current/{url_list}.json?api-key={nyt_api_key1}"
             nyt_list_data = parse_json(list_data_url)
             nyt_list_data_adj = nyt_list_data['results']['books']
             break
         else:
             no_match = "   \nWe couldn't find a matching genre! Please try again"
             print(no_match)
+# The List_Browse function is intended search New York Times and show a list of Available Best Seller Lists for the User
+# The function also allows the user to enter a best seller list and return the top 5 books from the list
 
 list_browse()
 
@@ -88,6 +90,7 @@ list_browse()
 book_list = {}
 read_list = {}
 
+#Key Feature 2: Add Book Titles and Authors to a Read List to be printed at the end of using the application
 def add_books_to_list():
         prompt6 = "Enter in the book title here: "
         book_add = input(prompt6)
@@ -97,6 +100,7 @@ def add_books_to_list():
         add_statement = f"\n{book_add}, written by {author_add} has been added to the Read List!\n"
         print(add_statement)
 
+#Key Feature 3: The book_ranking function is an extension of feature 1. It also allows the user to enter a best seller list and return the top 5 books from the list
 def book_ranking():
     for book in nyt_list_data_adj:
         global book_list
@@ -113,7 +117,7 @@ def book_ranking():
 
 book_ranking()
 
-#Ask the user if he/she wants to see a book description
+#The book_description function allows the user the ability to see a book description from New York Times API. This is part of feature 1.
 def book_description():
     for book in nyt_list_data_adj:
         if browse_or_read == book['title']:
@@ -122,7 +126,8 @@ def book_description():
             print(description)
         else:
             pass
-
+#The function below allows you to continue to browse, to add a book to a Read List, or to pass on to Searching a book on Amazon.
+#The Read List functionality helps complete feature 2.
 def more_options():
     while True:
         global browse_or_read
@@ -137,7 +142,7 @@ def more_options():
             add_books_to_list()
         elif browse_or_read in book_list:
             book_description()
-
+#Key Feature 4: The function below allows users to search Amazon for a Book Title and Author
 def amazon_search_results(product_data):
     amz = product_data['search_results']
     print("\nTop 3 Amazon Search Results:")
@@ -165,7 +170,7 @@ def amazon_search_results(product_data):
             for i in prices:
                 price_statement = f"   {i.capitalize()} {prices[i]}"
                 print(price_statement)
-
+#The function below navigates Amazon product data to pull book title, price, URL, avg. rating, and prime eligibility.
 def search_books():
     while browse_or_read != 'done':
         prompt3 = "\nSearch and Finish Options: \n1. Would you like to search any book title on Amazon.com? If so, enter 'search'.\n2. Would you like to finish searching books? If so, enter 'done'.\n3. Would you like to continue to browse? If so, enter 'browse'.\nEnter here: "
@@ -195,10 +200,10 @@ def search_books():
             get= get_products(amazon_url)
             amazon_search_results(get)
             break
-
+#The funciton below is for displaying a final prompt to the user, intended to provide a circular user experience allowing the user to continue to research or finish researching.
 def final_prompt():
     if search_book == 'done':
-        print("\nThank you for using the book finder app! Have a great day!")
+        print("\nThank you for using the Best Read Discovery App! Have a great day!")
         pass 
     elif search_book != 'done':
         prompt_final = ("\nWould you like to continue to research books?\nIf so type 'yes', if no type 'done'.\nEnter here: ")
@@ -207,7 +212,7 @@ def final_prompt():
             more_options()
             search_books()
     else:
-        print("\nThank you for using the book finder app! Have a great day!\n")
+        print("\nThank you for using the Best Read Discovery App! Have a great day!\n")
 
 #Ask the user if he/she wants to see the book on amazon
 #From Amazon API, pull in price and kindle format data
